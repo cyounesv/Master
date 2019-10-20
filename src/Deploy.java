@@ -1,47 +1,38 @@
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.stream.Collectors;
+
 
 public class Deploy {
-    public static String[] getRessources() throws IOException, InterruptedException {
-        String FolderPath = "/cal/homes/cvuillet/shavadoop/";
-        String datafilepath = FolderPath + "ListeOrdiTelecom.txt";
+    public static ArrayList<String> getRessources(String datafilepath) throws IOException, InterruptedException {
+        // String FolderPath = "/cal/homes/cvuillet/shavadoop/";
+        //String datafilepath = FolderPath + "ListeOrdiTelecom.txt";
 
         BufferedReader bfr = new BufferedReader(new FileReader(new File(datafilepath)));
         String str = null;
         ArrayList<String> pc = new ArrayList<>();
-        //String CurrentCommand = null;
-        //Integer NComputersTested = 0;
-        //Integer NComputersAvailable = 0;
-        //FileOutputStream fos = new FileOutputStream(FolderPath + "AvailableComputers.txt");
-        //PrintWriter pw = new PrintWriter(FolderPath + "AvailableComputers.txt");
 
         while ((str = bfr.readLine()) != null) {
-           // NComputersTested += 1;
-            //CurrentCommand = "ssh " + str + " pwd";
-            //ProcessBuilder pb = new ProcessBuilder("/bin/bash", "-c", CurrentCommand);
-            //pb = pb.redirectErrorStream(true);
-            //Process p = pb.start();
             pc.add(str);
-            //int notIsTimeout = p.waitFor();
-
-            //if (notIsTimeout==0){
-                //pw.println(str);
-              //  NComputersAvailable += 1;
-
-                // pb qui creer un dossier dans tmp puis copie le slave.jar
-            //}
-            //else{
-              //  p.destroy();
-            //}
         }
         bfr.close();
-        //pw.close();
-        //fos.close();
-
-        System.out.printf("Found %d computers available on %d computers tested", NComputersAvailable, NComputersTested);
+        return pc;
     }
-    public static void main(String[] args) throws IOException, InterruptedException {
-        getRessources();
+    public static ArrayList<String> getAvailableRessources(ArrayList<String> computers) throws IOException, InterruptedException {
+       // Master.sequentialProcessLauncher("ssh cvuillet@ssh.enst.fr hostname");
+        // ArrayList<String> pc = Deploy.getRessources("/home/cyounes/Documents/INFMDI727/ListeOrdiTelecom.txt");
+        ArrayList<String> okComputers = computers.parallelStream().filter(l -> Master.sequentialProcessLauncher("ssh cvuillet@"+l+" hostname" )).collect(Collectors.toCollection(ArrayList::new));
+        return okComputers;
+    }
+
+    public static void deployJar(String path) throws IOException, InterruptedException {
+
+       ArrayList<String > okComputers = Deploy.getAvailableRessources(getRessources(path));
+       System.out.println(okComputers);
+      // okComputers.parallelStream().map(l-> Master.sequentialProcessLauncher("ssh cvuillet@" + l + " mkdir -p /tmp/cvuillet")).collect(Collectors.toCollection(ArrayList::new));
+        okComputers.parallelStream().map(l-> Master.sequentialProcessLauncher("ssh cvuillet@" + l + " mkdir -p /tmp/cvuillet;ssh "+ l + " cp ~/shavadoop/SlaveNew.jar /tmp/cvuillet/")).collect(Collectors.toCollection(ArrayList::new));
+
     }
 
 }
