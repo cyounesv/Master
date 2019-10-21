@@ -54,6 +54,7 @@ public class Master {
             System.out.println(command1 + ";" + command2);
             Master.sequentialProcessLauncher(command1);
             Master.sequentialProcessLauncher(command2);
+
         }
     }
 
@@ -74,7 +75,6 @@ public class Master {
 
     }
 }
-
 // Appel fonction getRessources de Deploy qui va me retourner un tableau de string contenant les noms des ordis
 // Une facon de lancer les threads, sans attendre de retour de leur part:
 // Arrays.asList(pc).parallelStream().map(l -> sequentialProcessLauncher("ssh cvuillet@"+l+"pwd" )).collect(Collectors.toCollection(ArrayList::new));
